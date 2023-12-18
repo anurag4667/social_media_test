@@ -62,7 +62,7 @@ exports.deletepost = async (req,res) =>{
         user.posts.splice(index,1);
         await user.save();
         res.status(200).json({
-            status : true,
+            success : true,
             message : "post deleted"
         })
 
@@ -138,7 +138,7 @@ exports.addcomment = async (req,res) =>{
     
     await post.save();
     res.status(200).json({
-        status : true,
+        success : true,
         message : "comment added"
     })
     }
@@ -150,4 +150,74 @@ exports.addcomment = async (req,res) =>{
     }
     
 
+}
+
+exports.showposts = async(req,res) =>{
+
+    try{
+        const user = await User.findById(req.user._id);
+
+        const posts = await Post.find({
+            owner : {
+                $in : user.following,
+            },
+        });
+
+        res.status(200).json({
+            success : true,
+            posts,
+        })
+
+
+    }
+    catch(err){
+        res.status(500).json({
+            success : false,
+            message : err.message
+        })
+    }
+    
+}
+
+exports.updatecaption = async (req,res) =>{
+    try{
+        const user = await User.findById(req.user._id);
+        const post = await Post.findById(req.params.id);
+
+        if(!post){
+            return res.status(404).json({
+                success : false,
+                message : "post not found"
+            })
+        }
+
+        if(user._id.toString() !== post.owner.toString()){
+            return res.status(401).json({
+                success : false,
+                message : "unauthorized"
+            })
+        }
+        const caption = req.body.caption;
+        if(!caption){
+            return res.status(400).json({
+                success : false,
+                message : "please add caption"
+            })
+        }
+        post.caption = caption;
+        await post.save();
+
+        res.status(200).json({
+            success : true,
+            message : "caption updated"
+        })
+    }
+    catch(err){
+        res.status(500).json({
+            success : false,
+            message : err.message
+        })
+    }
+
+    
 }
