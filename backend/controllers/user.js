@@ -19,6 +19,8 @@ exports.register = async (req,res) =>{
         res.status(201).cookie("token",token ,{
             expires : new Date(Date.now() + 90*24*60*60*1000),
             httpOnly : true,
+            sameSite : process.env.NODE_ENV === "development" ? "lax" : "none",
+            secure : process.env.NODE_ENV === "development" ? false : true,
         })
         .json({
             success : true,
@@ -61,6 +63,8 @@ exports.login = async (req,res) =>{
         res.status(200).cookie("token",token ,{
             expires : new Date(Date.now() + 90*24*60*60*1000),
             httpOnly : true,
+            sameSite : process.env.NODE_ENV === "development" ? "lax" : "none",
+            secure : process.env.NODE_ENV === "development" ? false : true,
         })
         .json({
             success : true,
@@ -79,7 +83,11 @@ exports.login = async (req,res) =>{
 exports.logout = async (req,res) =>{
     try{
         res.status(200)
-        .cookie("token" , null ,{expires : new Date(Date.now()),httpOnly : true})
+        .cookie("token" , null ,{expires : new Date(Date.now())
+            ,httpOnly : true,
+            sameSite : process.env.NODE_ENV === "development" ? "lax" : "none",
+            secure : process.env.NODE_ENV === "development" ? false : true,
+        })
         .json({
             success : true,
             message : "logged out"
