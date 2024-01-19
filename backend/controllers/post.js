@@ -74,9 +74,6 @@ exports.deletepost = async (req,res) =>{
         })
     }
 
-    
-
-
 }
 exports.likeanddislike = async (req,res)=>{
     
@@ -121,7 +118,6 @@ exports.likeanddislike = async (req,res)=>{
         )
     }
 }
-
 exports.addcomment = async (req,res) =>{
 
     try{

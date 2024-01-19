@@ -1,5 +1,5 @@
 const User = require("../models/user.js");
-
+const Post = require("../models/post.js");
 exports.register = async (req,res) =>{
     try{
         const {name,email,password} = req.body;
@@ -24,7 +24,6 @@ exports.register = async (req,res) =>{
         })
         .json({
             success : true,
-            user,
             token,
         })
     }
@@ -68,7 +67,6 @@ exports.login = async (req,res) =>{
         })
         .json({
             success : true,
-            user,
             token,
         })
     }
@@ -213,3 +211,109 @@ exports.updateprofile = async (req,res) =>{
         })
     }
 }
+
+exports.deletemyprofile = async (req,res) =>{
+    try {
+        const user = await User.findById(req.user._id);
+        const posts = user.posts;
+        const followers = user.followers;
+        const following = user.following;
+        const userid = user._id;
+        await user.deleteOne();
+        
+        res.cookie("token" , null ,{expires : new Date(Date.now())
+            ,httpOnly : true,
+            sameSite : process.env.NODE_ENV === "development" ? "lax" : "none",
+            secure : process.env.NODE_ENV === "development" ? false : true,
+        });
+
+        for(let i = 0; i < posts.length ; i++){
+            const post = await Post.findById(posts[i]);
+            await post.deleteOne();
+        }
+
+        for(let i = 0; i < followers.length ; i++){
+            const follower = await User.findById(followers[i]);
+
+            const index = follower.following.indexOf(userid);
+            follower.following.splice(index,1);
+            await follower.save();
+        }
+
+        for(let i = 0; i < following.length ; i++){
+            const follows = await User.findById(following[i]);
+
+            const index = follows.followers.indexOf(userid);
+            follows.followers.splice(index,1);
+            await follows.save();
+        }
+
+        res.status(200).json({
+            success : true,
+            message : "profile deleted",
+        })
+    } catch (error) {
+        res.status(500).json({
+            success : false,
+            message : error.message,
+        })
+    }
+}
+
+exports.myprofile = async (req,res) =>{
+    try {
+        const user = await User.findById(req.user._id).populate("posts");
+
+        res.status(200).json({
+            success : true,
+            user,
+        })
+    } catch (error) {
+        res.status(500).json({
+            success : false,
+            message : error.message,
+        })
+    }
+}
+
+exports.getuserprofile = async (req,res) =>{
+    try {
+        const user = await User.findById(req.params.id).populate("posts");
+
+        if(!user){
+            res.status(404).json({
+                success : false,
+                message: "user not found",
+            })
+        }
+
+        return res.status(200).json({
+            success : true,
+            user,
+        })
+    } catch (error) {
+        res.status(500).json({
+            success : false,
+            message : "intenal server error",
+        })
+    }
+}
+
+exports.getallusers = async (req,res) =>{
+    try{
+        const users = await User.find({});
+
+        res.status(200).json({
+            success : true,
+            users,
+        })
+    }
+    catch(err){
+        res.status(500).json({
+            success : false,
+            message : "intenal server error",
+        })
+    }
+}
+
+

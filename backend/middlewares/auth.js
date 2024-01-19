@@ -24,5 +24,4 @@ exports.isauthenticated = async (req,res,next) => {
         })
     }
     
-    
 }

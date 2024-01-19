@@ -20,7 +20,7 @@ app.use(cors({
 
 //importing routes
 const post = require("./routes/post.js");
-const user = require("./routes/user.js")
+const user = require("./routes/user.js");
 
 //using routes
 app.use("/api/v1",post);
