@@ -13,7 +13,7 @@ router.route("/update/profile").put(isauthenticated,updateprofile);
 router.route("/deletemyprofile").delete(isauthenticated,deletemyprofile);
 router.route("/me").get(isauthenticated,myprofile);
 router.route("/profile/:id").get(isauthenticated,getuserprofile);
-router.route("/users").get(isauthenticated,getallusers);
+router.route("/users").get(getallusers);
 router.route("/forgot/password").post(forgotpassword);
 router.route("/password/reset/:token").put(resetpassword);
 module.exports = router;
